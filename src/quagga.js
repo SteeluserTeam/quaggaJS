@@ -323,18 +323,23 @@ function start() {
 
 function initWorker(cb) {
     var blobURL,
+        workerURL = _config.workerURL,
         workerThread = {
             worker: undefined,
             imageData: new Uint8Array(_inputStream.getWidth() * _inputStream.getHeight()),
             busy: true
         };
 
-    blobURL = generateWorkerBlob();
-    workerThread.worker = new Worker(blobURL);
+    if (!workerURL) {
+        workerURL = blobURL = generateWorkerBlob();
+    }
+    workerThread.worker = new Worker(workerURL);
 
     workerThread.worker.onmessage = function(e) {
         if (e.data.event === 'initialized') {
-            URL.revokeObjectURL(blobURL);
+            if (blobURL) {
+                URL.revokeObjectURL(blobURL);
+            }
             workerThread.busy = false;
             workerThread.imageData = new Uint8Array(e.data.imageData);
             if (ENV.development) {
@@ -540,4 +545,11 @@ export default {
     ImageDebug: ImageDebug,
     ResultCollector: ResultCollector,
     CameraAccess: CameraAccess,
+    startWorker: function() {
+        workerInterface(() => {
+            return {
+                default: this
+            };
+        });
+    }
 };
