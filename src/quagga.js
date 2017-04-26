@@ -341,13 +341,13 @@ function initWorker(cb) {
                 URL.revokeObjectURL(blobURL);
             }
             workerThread.busy = false;
-            workerThread.imageData = new Uint8Array(e.data.imageData);
+            workerThread.imageData = e.data.imageData;
             if (ENV.development) {
                 console.log("Worker initialized");
             }
             return cb(workerThread);
         } else if (e.data.event === 'processed') {
-            workerThread.imageData = new Uint8Array(e.data.imageData);
+            workerThread.imageData = e.data.imageData;
             workerThread.busy = false;
             publishResult(e.data.result, workerThread.imageData);
         } else if (e.data.event === 'error') {
@@ -393,11 +393,11 @@ function workerInterface(factory) {
             imageWrapper = new Quagga.ImageWrapper({
                 x: e.data.size.x,
                 y: e.data.size.y
-            }, new Uint8Array(e.data.imageData));
+            }, e.data.imageData);
             Quagga.init(config, ready, imageWrapper);
             Quagga.onProcessed(onProcessed);
         } else if (e.data.cmd === 'process') {
-            imageWrapper.data = new Uint8Array(e.data.imageData);
+            imageWrapper.data = e.data.imageData;
             Quagga.start();
         } else if (e.data.cmd === 'setReaders') {
             Quagga.setReaders(e.data.readers);
